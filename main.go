@@ -80,6 +80,12 @@ func atMessage() websocket.ATMessageEventHandler {
 			return getAbbreviationMeme(ChannelID)
 		}
 
+		// 查询梗
+		if strings.Contains(data.Content, "/查询梗") {
+			var memeName = strings.SplitAfter(data.Content, "/查询梗")[1]
+			return getMemeByName(strings.TrimSpace(memeName), ChannelID)
+		}
+
 		// @机器人台词
 		api.PostMessage(ctx, ChannelID, &dto.MessageToCreate{
 			Content: "哈喽，各位频道成员们，我是一个木得感情的科普机器人┗( ▔, ▔ )┛" +
@@ -114,5 +120,18 @@ func getAbbreviationMeme(ChannelID string) error {
 	api.PostMessage(ctx, ChannelID, &dto.MessageToCreate{
 		Content: meme.Name + "\n" + meme.Description,
 	})
+	return nil
+}
+
+// 查询梗 指令处理
+func getMemeByName(memeName string, ChannelID string) error {
+	meme := queryMemeByName(memeName)
+
+	for _, value := range meme {
+		api.PostMessage(ctx, ChannelID, &dto.MessageToCreate{
+			Content: value.Name + "\n" + value.Description,
+		})
+	}
+
 	return nil
 }
